@@ -1,0 +1,2 @@
+for_ec2(deploy)_tensorflow(asl)/dynamic(kaustubh)_asl_translator/variables/variables.data-00000-of-00001 filter=lfs diff=lfs merge=lfs -text
+for_ec2(deploy)_tensorflow(asl)/** filter=lfs diff=lfs merge=lfs -text
