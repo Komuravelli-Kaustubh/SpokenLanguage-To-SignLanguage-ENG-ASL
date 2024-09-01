@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Word Animation</title>
+
+  <style>
+    /* Reset some default styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    .left-column {
+      width: 43%;
+      height:38%;
+      /* background-color: #0a1924; */
+      padding: 2px;
+      margin-bottom: 18px;
+      /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); */
+      border-radius: 5px;
+    }
+
+    .left-column img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    /* Styling for the container */
+    .container {
+      display: flex;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      background-color: #2a3b4c;
+      color: #fff;
+    }
+
+    /* Styling for the left window container */
+    .left-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 20px;
+    }
+
+    /* Styling for the upper section of the left window */
+    .upper-section {
+      width: 100%;
+      background-color: #0a1924;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      border-radius: 5px;
+    }
+
+    
+
+    /* Styling for the lower section of the left window */
+    .lower-section {
+      width: 100%;
+      background-color: #0a1924;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      border-radius: 5px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    /* Styling for the right window container */
+    .right-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* Styling for the iframe */
+    /* .animation-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+      /* Add this line }*/
+     */
+
+    /* Styling for the input container */
+    .input-container {
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+      background-color: #0a1924;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      border-radius: 5px;
+    }
+
+    /* Styling for the input box */
+    .input-box {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    /* Styling for the confirm button */
+    .confirm-button {
+      background-color: #6ab04c;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      text-align: center;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    /* Styling for the toggle button */
+    .toggle-button {
+      background-color: #6ab04c;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      text-align: center;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Adjust the size of the microphone icon */
+    .toggle-button img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    /* Styling for the transcription output */
+    .transcription-output {
+      color: #fff;
+      margin-left: 10px;
+    }
+
+    /* Styling for the animation window */
+    .animation-window {
+      width: 100%;
+      max-width: 600px;
+      height: 100%;
+      border: none;
+      background-color: #0a1924;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Styling for the social message */
+    .social-message {
+      font-size: 18px;
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    /* Styling for the glossed output */
+    .gloss-output {
+      color: #fff;
+      margin-top: auto;
+    }
+
+    /* Styling for the gloss output container */
+    .gloss-output-container {
+      width: 100%;
+      padding: 20px;
+      background-color: #0a1924;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      border-radius: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="left-container">
+      <div class="left-column">
+        <img src="logo.png">
+      </div>
+      <div class="upper-section">
+        <h1>Enter a Word</h1>
+        <input type="text" class="input-box" id="word-input" placeholder="Type a word">
+        <button class="confirm-button" onclick="displayAnimation()" id="cnfrm">Confirm</button>
+      </div>
+      <div class="lower-section">
+        <div style="display: flex; flex-direction: column; align-items: flex-start;">
+          <h1>Speech Options</h1>
+          <div style="display: flex; align-items: center;">
+            <button class="toggle-button" onclick="toggleRecording()" id="toggle-recording">
+              <img src="microphone-icon-clipart-7.png" alt="Microphone">
+            </button>
+            <div class="transcription-output" id="transcription-output">Transcription will appear here</div>
+          </div>
+          <button class="confirm-button" id="send-recording-unreal">Send Recording</button>
+          <div class="gloss-output-container">
+            <h1>Translated Gloss</h1>
+            <div class="gloss-output"  id="gloss-output" >Translated gloss will appear here</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="right-container">
+      <div class="animation-window" id="animation-container">
+        
+      </div>
+    </div>
+  </div>
+
+  <script src="transcribe_it.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+  <script src="unrealWebSocket.js" type="module"></script>
+  <script src="streaming_purpose.js"></script>
+<body>
+</html>
