@@ -1,0 +1,794 @@
+<!-- <!DOCTYPE html>
+<html>
+
+<head>
+  <title>Websocket Demo</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <style>
+    .l {
+      /* margin-top: 20%; */
+      float: left;
+    }
+
+    .r {
+      float: right;
+    }
+
+    .container {
+      overflow: auto;
+    }
+
+    #textbox {
+      padding: 7px;
+      font-size: 16px;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      transition: border-color 0.3s ease;
+      width: 300px;
+    }
+
+    #textbox:focus {
+      outline: none;
+      border-color: #337ab7;
+      box-shadow: 0 0 5px #337ab7;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #337ab7;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #23527c;
+    }
+
+    button:disabled {
+      background-color: #999999;
+      cursor: not-allowed;
+    }
+
+    #myIframe {
+      width: 1000px;
+      height: 650px;
+      margin-right: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="l">
+    <div class="rec">
+      <div class="container" style="width:auto">
+        <div class="input-container">
+          <center>
+            <h1>SignSpeak</h1>
+          </center>
+          <center>
+            <h4>A conversational tool for people with impaired hearing</h4>
+          </center>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div>
+      <input type="text" id="textbox" placeholder="Type Here To Translate" />
+      <button id="toggleButton" onclick="toggleMicrophone()">
+        <i class="fas fa-microphone"></i>
+      </button>
+    </div>
+    <button onclick="sendMessage()">Send Message</button>
+  </div>
+  <div class="r">
+    <iframe id='myIframe' src="http://localhost:"></iframe>
+    <center>
+      <div id="messageContainer" style="margin-top: 30px; font-size: 50px;"></div>
+    </center>
+  </div>
+
+
+  <script>
+    let recognition;
+    let isRecording = false;
+
+    // Check if the browser supports the getUserMedia API
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      // Initialize SpeechRecognition object
+      recognition = new window.webkitSpeechRecognition();
+
+      // Set recognition options
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      // Toggle the microphone when the toggle button is clicked
+      // Toggle the microphone when the toggle button is clicked
+      function toggleMicrophone() {
+        if (isRecording) {
+          recognition.stop();
+          document.getElementById('toggleButton').innerHTML = '<i class="fas fa-microphone"></i>';
+        } else {
+          recognition.start();
+          document.getElementById('toggleButton').innerHTML = '<i class="fas fa-microphone-slash"></i>';
+        }
+        isRecording = !isRecording;
+      }
+
+
+      // Process the transcribed text
+      recognition.onresult = function (event) {
+        let interimTranscript = '';
+        let finalTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          let transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript + ' ';
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+        // Send the transcribed text to the textbox
+        document.getElementById('textbox').value = finalTranscript + interimTranscript;
+      };
+    }
+
+
+    var socket = new WebSocket("ws://localhost:8080/");
+    function sendMessage() {
+      console.log("Received message: " + event.data);
+      var sentence = document.getElementById("textbox").value;
+      var words = sentence.split(' ');
+      var index = 0;
+      var messageContainer = document.getElementById("messageContainer");
+      messageContainer.textContent = sentence;
+
+      function removePunctuation(word) {
+        return word.replace(/[^\w\s]|_/g, "");
+      }
+
+      function sendWord() {
+        if (index < words.length) {
+          var word = words[index];
+          word = removePunctuation(word);
+          socket.send(word);
+          console.log("Sent word: " + word);
+          index++;
+          setTimeout(sendWord, 2000);
+        }
+      }
+
+      sendWord();
+      finalTranscript = '';
+      interimTranscript = '';
+      document.getElementById('textbox').value = '';
+    }
+    document.getElementById('textbox').addEventListener('keydown', function (event) {
+      if (event.keyCode === 13) {
+        event.preventDefault();
+        sendMessage();
+      }
+    });
+    function gfdsa() {
+  const apiUrl = `http://ec2-54-152-205-213.compute-1.amazonaws.com:2000/${encodeURIComponent(sentence)}`;
+
+  fetch(apiUrl)
+    .then((response) => response.json())
+    .then((data) => {
+      const predict = data.predict.trim(); // Trim any leading/trailing spaces
+      console.log("from api fetched: ",predict);
+      const wordsArray = predict.toLowerCase().split(' ');
+
+      let index = 0;
+      const sendWordWithDelay = () => {
+        if (index < wordsArray.length) {
+          var word = wordsArray[index];
+          if(word[0]==='x')word=word.slice(2);
+          socket.send(word);
+          console.log('Sent word to Unreal:', word);
+          index++;
+          setTimeout(sendWordWithDelay, 2000); // 4 seconds delay
+        }
+      };
+
+      sendWordWithDelay();
+    })
+    .catch((error) => {
+      console.error('Error fetching prediction:', error);
+    });
+}
+
+  </script>
+</body>
+
+</html> -->
+
+
+
+
+
+<!-- <!DOCTYPE html>
+<html>
+
+<head>
+  <title>Websocket Demo</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    .r {
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+    }
+
+    #myIframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+
+    #messageContainer {
+      font-size: 24px;
+      margin-top: 20px;
+      color: #337ab7;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">SignSpeak</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="#">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">About</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+            Services
+          </a>
+          <div class="dropdown-menu" aria-labelledby="servicesDropdown">
+            <a class="dropdown-item" href="#">Service 1</a>
+            <a class="dropdown-item" href="#">Service 2</a>
+            <a class="dropdown-item" href="#">Service 3</a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container mt-1">
+    <div class="card">
+      <div class="card-body">
+        <center>
+          <h3 class="card-title">A conversational tool for people with impaired hearing</h3>
+        </center>
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" id="textbox" placeholder="Type Here To Translate">
+          <button class="btn btn-secondary mb-2" id="toggleButton" onclick="toggleMicrophone()">
+            <i class="fas fa-microphone"></i>
+          </button>
+        </div>
+        <div class="input-group-append">
+          <center>
+            <button class="btn btn-primary" type="button" onclick="sendMessage()">Send Message</button>
+          </center>
+        </div>
+        <br>
+        <div class="embed-responsive embed-responsive-16by9">
+          <iframe class="embed-responsive-item" id="myIframe" src="http://localhost:"></iframe>
+        </div>
+        <div class="text-center mt-4">
+          <div id="messageContainer" class="display-4"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script>
+    let recognition;
+    let isRecording = false;
+
+    // Check if the browser supports the getUserMedia API
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      // Initialize SpeechRecognition object
+      recognition = new window.webkitSpeechRecognition();
+
+      // Set recognition options
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      // Toggle the microphone when the toggle button is clicked
+      // Toggle the microphone when the toggle button is clicked
+      function toggleMicrophone() {
+        if (isRecording) {
+          recognition.stop();
+          document.getElementById('toggleButton').innerHTML = '<i class="fas fa-microphone"></i>';
+        } else {
+          recognition.start();
+          document.getElementById('toggleButton').innerHTML = '<i class="fas fa-microphone-slash"></i>';
+        }
+        isRecording = !isRecording;
+      }
+
+
+      // Process the transcribed text
+      recognition.onresult = function (event) {
+        let interimTranscript = '';
+        let finalTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          let transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript + ' ';
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+        // Send the transcribed text to the textbox
+        document.getElementById('textbox').value = finalTranscript + interimTranscript;
+      };
+    }
+
+    // Check if the browser supports the WebSocket API
+    if (window.WebSocket) {
+      const socket = new WebSocket('wss://gtg3p8yh66.execute-api.us-east-1.amazonaws.com/production');
+      // Connection opened event
+      socket.onopen = function (event) {
+        console.log('WebSocket connection opened');
+      };
+
+      // Message received event
+      socket.onmessage = function (event) {
+        const message = event.data;
+        console.log('Received message from Colab:', message);
+
+        // Display the output message in the HTML
+        const messageContainer = document.getElementById('messageContainer');
+        messageContainer.textContent = message;
+
+        // Send the output message to localhost:8080
+        const outputSocket = new WebSocket('ws://localhost:8080/');
+        outputSocket.onopen = function (event) {
+          console.log('WebSocket connection to localhost:8080 opened');
+          const words = message.split(' ');
+          let index = 0;
+
+          function removePunctuation(word) {
+            return word.replace(/[^\w\s]|_/g, '');
+          }
+
+          function sendWord() {
+            if (index < words.length) {
+              const word = removePunctuation(words[index]);
+              outputSocket.send(word);
+              console.log('Sent word: ' + word);
+              index++;
+              setTimeout(sendWord, 1000);
+            }
+          }
+
+          sendWord();
+        };
+      };
+
+      // Send a message to Colab when the button is clicked
+      function sendMessage() {
+        const sentence = document.getElementById('textbox').value;
+        socket.send(sentence);
+        document.getElementById('textbox').value = '';
+      }
+
+      // Send a message to Colab when Enter key is pressed
+      document.getElementById('textbox').addEventListener('keydown', function (event) {
+        if (event.keyCode === 13) {
+          event.preventDefault();
+          sendMessage();
+        }
+      });
+    } else {
+      console.error('WebSocket is not supported in this browser.');
+    }
+
+
+  </script>
+</body>
+
+</html> -->
+
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Websocket Demo</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <style>
+    .navbar {
+      margin-bottom: 20px;
+    }
+
+    .container {
+      margin-top: 20px;
+      margin-left: 30px;
+    }
+
+    .microphone-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .microphone-button {
+      margin-left: 10px;
+    }
+
+    #textbox {
+      margin-right: 10px;
+    }
+
+    .search-button {
+      margin-top: 10px;
+    }
+
+    #myIframe {
+      width: 1000px;
+      height: 600px;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="#">SignSpeak</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="#">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#about">About</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#contact">Contact</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-4">
+        <div class="microphone-container">
+          <input type="text" id="textbox" class="form-control" placeholder="Enter your message..." />
+          <button id="microphoneButton" class="btn btn-primary">
+            <i class="fas fa-microphone"></i>
+          </button>
+        </div>
+        <button onclick="sendMessage()" class="btn btn-primary search-button">Send Message</button>
+      </div>
+      <div class="col-lg-6">
+        <iframe id="myIframe" src="http://localhost:"></iframe>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/js/bootstrap.bundle.min.js"></script>
+  <script>
+    let recognition;
+    let finalTranscript = '';
+
+    // Check if the browser supports the getUserMedia API
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      // Initialize SpeechRecognition object
+      recognition = new window.webkitSpeechRecognition();
+
+      // Set recognition options
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      // Start recording when the microphone button is clicked
+      document.getElementById('microphoneButton').addEventListener('click', function () {
+        recognition.start();
+        document.getElementById('microphoneButton').disabled = true;
+      });
+
+      // Stop recording when the microphone button is clicked again
+      recognition.addEventListener('end', function () {
+        recognition.stop();
+        document.getElementById('microphoneButton').disabled = false;
+      });
+
+      // Process the transcribed text
+      recognition.onresult = function (event) {
+        let interimTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          let transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript + ' ';
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+        // Send the transcribed text to the textbox
+        document.getElementById('textbox').value = finalTranscript + interimTranscript;
+      };
+    }
+    function removePunctuation(word) {
+      return word.replace(/[^\w\s]|_/g, "");
+    }
+    var socket = new WebSocket("ws://localhost:8080/");
+    var sentence = ""
+    function sendMessage() {
+      sentence = document.getElementById("textbox").value;
+      sentence = removePunctuation(sentence);
+      console.log(sentence);
+      var words = sentence.split(' ');
+      var index = 0;
+      gfdsa();
+
+
+      finalTranscript = '';
+      interimTranscript = '';
+      document.getElementById('textbox').value = '';
+    }
+    document.getElementById('textbox').addEventListener('keydown', function (event) {
+      if (event.keyCode === 13) {
+        event.preventDefault();
+        sendMessage();
+      }
+    });
+    function gfdsa() {
+      const apiUrl = `http://ec2-44-202-148-95.compute-1.amazonaws.com:2000/${encodeURIComponent(sentence)}`;
+
+      fetch(apiUrl)
+        .then((response) => response.json())
+        .then((data) => {
+          const predict = data.predict.trim(); // Trim any leading/trailing spaces
+          console.log("from api fetched: ", predict);
+          const wordsArray = predict.toLowerCase().split(' ');
+
+          let index = 0;
+          const sendWordWithDelay = () => {
+            if (index < wordsArray.length) {
+              var word = wordsArray[index];
+              if (word[0] === 'x') word = word.slice(2);
+              if (word[0] === 'd' && word[4] === '-') word = word.slice(5);
+              socket.send(word);
+              console.log('Sent word to Unreal:', word);
+              index++;
+              setTimeout(sendWordWithDelay, 6000); // 4 seconds delay
+            }
+          };
+
+          sendWordWithDelay();
+        })
+        .catch((error) => {
+          console.error('Error fetching prediction:', error);
+        });
+    }
+
+  </script>
+</body>
+
+</html>
+
+
+
+<!-- <!DOCTYPE html>
+<html>
+
+<head>
+  <title>Websocket Demo</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <style>
+    .l {
+      /* margin-top: 20%; */
+      float: left;
+    }
+
+    .r {
+      float: right;
+    }
+
+    .container {
+      overflow: auto;
+    }
+
+    #textbox {
+      padding: 7px;
+      font-size: 16px;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      transition: border-color 0.3s ease;
+      width: 300px;
+    }
+
+    #textbox:focus {
+      outline: none;
+      border-color: #337ab7;
+      box-shadow: 0 0 5px #337ab7;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #337ab7;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #23527c;
+    }
+
+    button:disabled {
+      background-color: #999999;
+      cursor: not-allowed;
+    }
+    #myIframe {
+      width: 1000px;
+      height: 650px;
+      margin-right: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="l">
+    <div class="rec">
+      <div class="container" style="width:auto">
+        <div class="input-container">
+          <center>
+            <h1>SignSpeak</h1>
+          </center>
+          <center>
+            <h4>A conversational tool for people with impaired hearing</h4>
+          </center>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div>
+      <input type="text" id="textbox" placeholder="Type Here To Translate" />
+      <button id="toggleButton" onclick="toggleMicrophone()">
+        <i class="fas fa-microphone"></i>
+      </button>
+    </div>
+    <button onclick="sendMessage()">Send Message</button>
+  </div>
+  <div class="r">
+    <iframe id='myIframe' src="http://localhost:"></iframe>
+    <center>
+      <div id="messageContainer" style="margin-top: 30px; font-size: 50px;"></div>
+    </center>
+  </div>
+
+
+  <script>
+    let recognition;
+    let isRecording = false;
+
+    // Check if the browser supports the getUserMedia API
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      // Initialize SpeechRecognition object
+      recognition = new window.webkitSpeechRecognition();
+
+      // Set recognition options
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      // Toggle the microphone when the toggle button is clicked
+      // Toggle the microphone when the toggle button is clicked
+      function toggleMicrophone() {
+        if (isRecording) {
+          recognition.stop();
+          document.getElementById('toggleButton').innerHTML = '<i class="fas fa-microphone"></i>';
+        } else {
+          recognition.start();
+          document.getElementById('toggleButton').innerHTML = '<i class="fas fa-microphone-slash"></i>';
+        }
+        isRecording = !isRecording;
+      }
+
+
+      // Process the transcribed text
+      recognition.onresult = function (event) {
+        let interimTranscript = '';
+        let finalTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          let transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript + ' ';
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+        // Send the transcribed text to the textbox
+        document.getElementById('textbox').value = finalTranscript + interimTranscript;
+      };
+    }
+
+
+    var socket = new WebSocket("ws://localhost:8080/");
+    function sendMessage() {
+      console.log("Received message: " + event.data);
+      var sentence = document.getElementById("textbox").value;
+      var words = sentence.split(' ');
+      var index = 0;
+      var messageContainer = document.getElementById("messageContainer");
+      messageContainer.textContent = sentence;
+
+      function removePunctuation(word) {
+        return word.replace(/[^\w\s]|_/g, "");
+      }
+
+      function sendWord() {
+        if (index < words.length) {
+          var word = words[index];
+          word = removePunctuation(word);
+          socket.send(word);
+          console.log("Sent word: " + word);
+          index++;
+          setTimeout(sendWord, 2000);
+        }
+      }
+
+      sendWord();
+      finalTranscript = '';
+      interimTranscript = '';
+      document.getElementById('textbox').value = '';
+    }
+    document.getElementById('textbox').addEventListener('keydown', function (event) {
+      if (event.keyCode === 13) {
+        event.preventDefault();
+        sendMessage();
+      }
+    });
+    // Check if the browser supports the WebSocket API
+
+
+  </script>
+</body>
+
+</html> -->
